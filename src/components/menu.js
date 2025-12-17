@@ -1,25 +1,18 @@
-// src/components/Menu.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "../style.css";
 
-// Import images from src/assets/images
-import shrimpImg from "../assets/images/IMG_3948.jpg";
-import fishStewImg from "../assets/images/IMG_3951.jpg";
-import sailorRiceImg from "../assets/images/IMG_3950.jpg";
-import seaSoupImg from "../assets/images/IMG_3952.jpg";
-import kidsMealImg from "../assets/images/IMG_3953.jpg";
-
 export default function Menu() {
+  const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
+  const [notification, setNotification] = useState(""); 
 
-  const menuItems = [
-    { id: 1, name: "Breaded Shrimp", price: 13.99, img: shrimpImg },
-    { id: 2, name: "Fish Stew", price: 15.5, img: fishStewImg },
-    { id: 3, name: "Sailor Rice", price: 14.99, img: sailorRiceImg },
-    { id: 4, name: "Sea Soup", price: 11.99, img: seaSoupImg },
-    { id: 5, name: "Kids Meal (Shrimp)", price: 6.5, img: kidsMealImg },
-  ];
+  useEffect(() => {
+    fetch("http://localhost:3001/api/menu")
+      .then((res) => res.json())
+      .then((data) => setMenuItems(data))
+      .catch((err) => console.error("Error:", err));
+  }, []);
 
   function addToCart(item) {
     setCart((prev) => {
@@ -32,6 +25,20 @@ export default function Menu() {
         return [...prev, { ...item, quantity: 1 }];
       }
     });
+
+    // show notification
+    setNotification(`${item.name} added to cart!`);
+    setTimeout(() => setNotification(""), 2000); 
+  }
+
+  function decreaseQuantity(item) {
+    setCart((prev) =>
+      prev
+        .map((i) =>
+          i.name === item.name ? { ...i, quantity: i.quantity - 1 } : i
+        )
+        .filter((i) => i.quantity > 0)
+    );
   }
 
   function removeFromCart(name) {
@@ -42,7 +49,54 @@ export default function Menu() {
     setCart([]);
   }
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  async function placeOrder() {
+    if (cart.length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+
+    const customerName = prompt("Please enter your name:");
+    if (!customerName || customerName.trim() === "") {
+      alert("Name is required to place an order.");
+      return;
+    }
+
+    const customerMail = prompt("Please enter your email:");
+    if (!customerMail || customerMail.trim() === "") {
+      alert("Email is required for order confirmation.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3001/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart,
+          total,
+          customerName,
+          customerMail,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(`Thanks ${customerName}! Your order has been placed.`);
+        clearCart();
+      } else {
+        alert(data.message || "Error placing order");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  }
 
   return (
     <>
@@ -51,22 +105,10 @@ export default function Menu() {
 
         <nav id="navbar">
           <ul>
-            <li>
-              <NavLink to="/" end>
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/menu" className="active">
-                Menu
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/about">About</NavLink>
-            </li>
-            <li>
-              <NavLink to="/contact">Contact</NavLink>
-            </li>
+            <li><NavLink to="/" end>Home</NavLink></li>
+            <li><NavLink to="/menu" className="active">Menu</NavLink></li>
+            <li><NavLink to="/about">About</NavLink></li>
+            <li><NavLink to="/contact">Contact</NavLink></li>
           </ul>
         </nav>
       </header>
@@ -76,11 +118,11 @@ export default function Menu() {
         <div className="menu-items">
           {menuItems.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className="item"
               onClick={() => addToCart(item)}
             >
-              <img src={item.img} alt={item.name} />
+              <img src={`/images/${item.img}`} alt={item.name} />
               <h3>{item.name}</h3>
               <p>${item.price.toFixed(2)}</p>
             </div>
@@ -90,34 +132,34 @@ export default function Menu() {
 
       <section className="cart">
         <h2>Your Cart</h2>
+
+        {notification && <p className="notification">{notification}</p>}
+
         <ul>
           {cart.map((item) => (
             <li key={item.name}>
-              {item.name} x{item.quantity} - $
+              {item.name} x{item.quantity} – $
               {(item.price * item.quantity).toFixed(2)}{" "}
+              <button onClick={() => decreaseQuantity(item)}>-</button>{" "}
+              <button onClick={() => addToCart(item)}>+</button>{" "}
               <button onClick={() => removeFromCart(item.name)}>Remove</button>
             </li>
           ))}
         </ul>
         <p>Total: ${total.toFixed(2)}</p>
+
         <button className="clear-btn" onClick={clearCart}>Clear Cart</button>
-        <button className="continue-btn">Continue to Payment</button>
+        <button className="continue-btn" onClick={placeOrder}>Place Order</button>
       </section>
 
       <footer>
         <p>
-          Follow us on:{" "}
-          <a href="https://www.facebook.com/LosCebichesdelaRuminahui.ec/?locale=es_LA">
-            Facebook
-          </a>{" "}
-          |{" "}
-          <a href="https://www.instagram.com/loscebichesdelaruminahui/?hl=es">
-            Instagram
-          </a>
+          Follow us on:
+          <a href="https://www.facebook.com/LosCebichesdelaRuminahui.ec/?locale=es_LA"> Facebook</a> |
+          <a href="https://www.instagram.com/loscebichesdelaruminahui/?hl=es"> Instagram</a>
         </p>
         <p>Open daily: 11AM – 10PM</p>
       </footer>
     </>
   );
 }
-
