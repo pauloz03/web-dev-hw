@@ -13,7 +13,8 @@ const app = express();
 app.use(cors({
   origin: [
     "https://web-dev-h2xdwvlal-pauloz03s-projects.vercel.app",
-    "http://localhost:3000" 
+    "https://web-dev-5hl6y4h81-pauloz03s-projects.vercel.app",
+    "http://localhost:3000"
   ]
 }));
 
