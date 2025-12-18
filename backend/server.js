@@ -9,18 +9,46 @@ dotenv.config();
 
 const app = express();
 
-// CORS: allow requests only from your frontend
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*" 
+  origin: process.env.FRONTEND_URL || "*"
 }));
 app.use(express.json());
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(async () => {
+    console.log("MongoDB connected:", mongoose.connection.db.databaseName);
+
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log("Collections in DB:", collections.map(c => c.name));
+
+   
+    const MenuItemSchema = new mongoose.Schema({
+      name: String,
+      price: Number,
+      img: String
+    });
+    const MenuItem = mongoose.model("MenuItem", MenuItemSchema, "menuItems");
+
+    // Check if menuItems collection is empty
+    const count = await MenuItem.countDocuments();
+    if (count === 0) {
+      console.log("menuItems collection is empty, seeding data...");
+      const items = [
+        { name: "Fish Stew", price: 15.5, img: "IMG_3951.jpg" },
+        { name: "Breaded Shrimp", price: 13.99, img: "IMG_3948.jpg" },
+        { name: "Sailor Rice", price: 14.99, img: "IMG_3950.jpg" },
+        { name: "Sea Soup", price: 11.99, img: "IMG_3952.jpg" }
+      ];
+      await MenuItem.insertMany(items);
+      console.log("menuItems seeded!");
+    } else {
+      console.log(`menuItems collection already has ${count} items.`);
+    }
+  })
   .catch(err => console.error("MongoDB connection error:", err));
 
-// MenuItem schema & model
 const MenuItemSchema = new mongoose.Schema({
   name: String,
   price: Number,
