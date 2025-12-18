@@ -1,13 +1,16 @@
+// src/components/Menu.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "../style.css";
 
-const BACKEND_URL = "https://web-dev-hw-1.onrender.com";
+// Usa la variable de entorno, con fallback a producción si no está
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL || "https://web-dev-hw-1.onrender.com";
 
 export default function Menu() {
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
-  const [notification, setNotification] = useState(""); 
+  const [notification, setNotification] = useState("");
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/menu`)
@@ -29,7 +32,7 @@ export default function Menu() {
     });
 
     setNotification(`${item.name} added to cart!`);
-    setTimeout(() => setNotification(""), 2000); 
+    setTimeout(() => setNotification(""), 2000);
   }
 
   function decreaseQuantity(item) {
@@ -106,10 +109,22 @@ export default function Menu() {
 
         <nav id="navbar">
           <ul>
-            <li><NavLink to="/" end>Home</NavLink></li>
-            <li><NavLink to="/menu" className="active">Menu</NavLink></li>
-            <li><NavLink to="/about">About</NavLink></li>
-            <li><NavLink to="/contact">Contact</NavLink></li>
+            <li>
+              <NavLink to="/" end>
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/menu" className="active">
+                Menu
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/about">About</NavLink>
+            </li>
+            <li>
+              <NavLink to="/contact">Contact</NavLink>
+            </li>
           </ul>
         </nav>
       </header>
@@ -149,15 +164,26 @@ export default function Menu() {
         </ul>
         <p>Total: ${total.toFixed(2)}</p>
 
-        <button className="clear-btn" onClick={clearCart}>Clear Cart</button>
-        <button className="continue-btn" onClick={placeOrder}>Place Order</button>
+        <button className="clear-btn" onClick={clearCart}>
+          Clear Cart
+        </button>
+        <button className="continue-btn" onClick={placeOrder}>
+          Place Order
+        </button>
       </section>
 
       <footer>
         <p>
           Follow us on:
-          <a href="https://www.facebook.com/LosCebichesdelaRuminahui.ec/?locale=es_LA"> Facebook</a> |
-          <a href="https://www.instagram.com/loscebichesdelaruminahui/?hl=es"> Instagram</a>
+          <a href="https://www.facebook.com/LosCebichesdelaRuminahui.ec/?locale=es_LA">
+            {" "}
+            Facebook
+          </a>{" "}
+          |{" "}
+          <a href="https://www.instagram.com/loscebichesdelaruminahui/?hl=es">
+            {" "}
+            Instagram
+          </a>
         </p>
         <p>Open daily: 11AM – 10PM</p>
       </footer>
