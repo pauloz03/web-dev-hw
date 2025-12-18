@@ -1,21 +1,26 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import { Order } from "./order.js"; 
+import { Order } from "./order.js";
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// CORS: allow requests only from your frontend
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*" 
+}));
 app.use(express.json());
 
-// Connect to MongoDB
+// Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("MongoDB connection error:", err));
 
-// MenuItem Schema
+// MenuItem schema & model
 const MenuItemSchema = new mongoose.Schema({
   name: String,
   price: Number,
