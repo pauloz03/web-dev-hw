@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "../style.css";
 
+const BACKEND_URL = "https://web-dev-hw-1.onrender.com";
+
 export default function Menu() {
   const [menuItems, setMenuItems] = useState([]);
   const [cart, setCart] = useState([]);
   const [notification, setNotification] = useState(""); 
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/menu")
+    fetch(`${BACKEND_URL}/api/menu`)
       .then((res) => res.json())
       .then((data) => setMenuItems(data))
       .catch((err) => console.error("Error:", err));
@@ -26,7 +28,6 @@ export default function Menu() {
       }
     });
 
-    // show notification
     setNotification(`${item.name} added to cart!`);
     setTimeout(() => setNotification(""), 2000); 
   }
@@ -73,7 +74,7 @@ export default function Menu() {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/api/orders", {
+      const res = await fetch(`${BACKEND_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
