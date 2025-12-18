@@ -1,4 +1,4 @@
-// src/components/About.jsx
+// src/components/About.jsx..
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import "../style.css";
