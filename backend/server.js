@@ -11,8 +11,12 @@ const app = express();
 
 // CORS: allow requests from your frontend
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*"
+  origin: [
+    "https://web-dev-h2xdwvlal-pauloz03s-projects.vercel.app",
+    "http://localhost:3000" 
+  ]
 }));
+
 app.use(express.json());
 
 // MenuItem schema & model
