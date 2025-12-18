@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "../style.css";
 
-// Usa la variable de entorno, con fallback a producción si no está
 const BACKEND_URL =
   process.env.REACT_APP_BACKEND_URL || "https://web-dev-hw-1.onrender.com";
 
