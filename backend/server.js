@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import { Order } from "./models/Order.js"; // asegúrate que la ruta sea correcta
+import { Order } from "./order.js"; 
 
 dotenv.config();
 
