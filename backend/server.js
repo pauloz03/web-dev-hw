@@ -9,11 +9,19 @@ dotenv.config();
 
 const app = express();
 
-
+// CORS: allow requests from your frontend
 app.use(cors({
   origin: process.env.FRONTEND_URL || "*"
 }));
 app.use(express.json());
+
+// MenuItem schema & model
+const MenuItemSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  img: String
+});
+const MenuItem = mongoose.models.MenuItem || mongoose.model("MenuItem", MenuItemSchema, "menuItems");
 
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
@@ -23,15 +31,7 @@ mongoose.connect(process.env.MONGO_URI)
     const collections = await mongoose.connection.db.listCollections().toArray();
     console.log("Collections in DB:", collections.map(c => c.name));
 
-   
-    const MenuItemSchema = new mongoose.Schema({
-      name: String,
-      price: Number,
-      img: String
-    });
-    const MenuItem = mongoose.model("MenuItem", MenuItemSchema, "menuItems");
-
-    // Check if menuItems collection is empty
+    // Seed menuItems if empty
     const count = await MenuItem.countDocuments();
     if (count === 0) {
       console.log("menuItems collection is empty, seeding data...");
@@ -48,13 +48,6 @@ mongoose.connect(process.env.MONGO_URI)
     }
   })
   .catch(err => console.error("MongoDB connection error:", err));
-
-const MenuItemSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  img: String
-});
-const MenuItem = mongoose.model("MenuItem", MenuItemSchema, "menuItems");
 
 // GET /api/menu
 app.get("/api/menu", async (req, res) => {
@@ -86,5 +79,6 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
+// Start server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
