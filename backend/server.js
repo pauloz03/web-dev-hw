@@ -1,9 +1,8 @@
-// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import { Order } from "./order.js"; 
+import { Order } from "./models/Order.js"; // asegúrate que la ruta sea correcta
 
 dotenv.config();
 
@@ -12,24 +11,22 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI + "&dbName=RestaurantDB")
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("MongoDB connection error:", err));
 
+// MenuItem Schema
 const MenuItemSchema = new mongoose.Schema({
   name: String,
   price: Number,
   img: String
 });
-
-// match the collection name in Atlas
 const MenuItem = mongoose.model("MenuItem", MenuItemSchema, "menuItems");
 
-// GET menu items
+// GET /api/menu
 app.get("/api/menu", async (req, res) => {
   try {
     const items = await MenuItem.find();
-    console.log("Fetched items:", items);
     res.json(items);
   } catch (err) {
     console.error(err);
@@ -37,23 +34,14 @@ app.get("/api/menu", async (req, res) => {
   }
 });
 
-
 // POST /api/orders
 app.post("/api/orders", async (req, res) => {
   try {
     const { items, total, customerName, customerMail } = req.body;
 
-    if (!items || items.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
-    }
-
-    if (!customerName || customerName.trim() === "") {
-      return res.status(400).json({ message: "Customer name is required" });
-    }
-
-    if (!customerMail || customerMail.trim() === "") {
-      return res.status(400).json({ message: "Customer email is required for order confirmation" });
-    }
+    if (!items || items.length === 0) return res.status(400).json({ message: "Cart is empty" });
+    if (!customerName || customerName.trim() === "") return res.status(400).json({ message: "Customer name is required" });
+    if (!customerMail || customerMail.trim() === "") return res.status(400).json({ message: "Customer email is required" });
 
     const order = new Order({ items, total, customerName, customerMail });
     await order.save();
@@ -65,5 +53,5 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
